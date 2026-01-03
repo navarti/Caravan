@@ -1,0 +1,70 @@
+@font-face {
+  font-family: 'VanillaWhale';
+  src: url('/assets/fonts/Vanilla Whale.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+      font-size: 16px;
+    }
+}
+
+body {
+    margin-bottom: 60px;
+    font-family: 'VanillaWhale', sans-serif;
+}
+
+.highlight {
+    border: 2px solid red;
+}
+.dim {
+    opacity: 0.5;
+}
+.selected {
+    border: 3px solid #28a745 !important;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+.card-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.attached-cards {
+    display: flex;
+    flex-direction: row;
+    margin-left: 10px;
+}
+.card {
+    margin-right: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+.card:hover:not(:disabled) {
+    border-color: #007bff;
+    transform: translateY(-2px);
+}
+.card:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.player-cards {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+#playerHandCards {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}

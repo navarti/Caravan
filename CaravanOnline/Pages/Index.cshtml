@@ -1,0 +1,152 @@
+﻿@page
+@model IndexModel
+@using CaravanOnline.Services
+@using CaravanOnline.Models
+
+<h2 id="userMessage">@Model.Message</h2>
+
+<div style="margin-bottom: 15px;">
+    <button type="button" onclick="activateDiscardLane()">Discard Lane</button>
+    <button type="button" onclick="activateDiscardCard()">Discard Card</button>
+</div>
+
+<form method="post" id="card-selection-form">
+    @Html.AntiForgeryToken()
+    <p>Current Player: @HttpContext.Session.GetString("CurrentPlayer")</p>
+    <div class="player-cards">
+        @if (HttpContext.Session.GetString("CurrentPlayer") == "Player 1" 
+            && Model.Player1Cards != null && Model.Player1Cards.Count > 0)
+        {
+            <p>Player 1: Select a card</p>
+            @foreach (var card in Model.Player1Cards)
+            {
+                var cardImagePath = CardImageHelper.GetCardImagePath(card);
+                <button type="button" class="card"
+                        data-face="@card.Face" 
+                        data-full="@($"{card.Face} {card.Suit}")"
+                        onclick="highlightCards(this.dataset.face, this.dataset.full)">
+                    <img src="@cardImagePath" alt="@card.Face @card.Suit" style="width:80px; height:auto;" />
+                </button>
+            }
+        }
+        else if (HttpContext.Session.GetString("CurrentPlayer") == "Player 2" 
+                 && Model.Player2Cards != null && Model.Player2Cards.Count > 0)
+        {
+            <p>Player 2: Select a card</p>
+            @foreach (var card in Model.Player2Cards)
+            {
+                var cardImagePath = CardImageHelper.GetCardImagePath(card);
+                <button type="button" class="card"
+                        data-face="@card.Face" 
+                        data-full="@($"{card.Face} {card.Suit}")"
+                        onclick="highlightCards(this.dataset.face, this.dataset.full)">
+                    <img src="@cardImagePath" alt="@card.Face @card.Suit" style="width:80px; height:auto;" />
+                </button>
+            }
+        }
+    </div>
+    <input type="hidden" name="selectedCard" id="selectedCardInput">
+</form>
+
+<div>
+    <h3>Lane Displays</h3>
+    <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-around;">
+            @for (int lane = 1; lane <= 3; lane++)
+            {
+                <div>
+                    <form method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" name="selectedLane" value="@lane"
+                                style="background:none;border:none;padding:0;cursor:pointer;"
+                                @(HttpContext.Session.GetString("CurrentPlayer") == "Player 1" ? "" : "disabled")>
+                            <h4>Lane @lane (Score: @Model.CalculateLaneScore(@lane))</h4>
+                        </button>
+
+                        @if (Model.Lanes.Count >= lane && Model.Lanes[lane - 1] != null)
+                        {
+                            @for (int index = 0; index < Model.Lanes[lane - 1].Count; index++)
+                            {
+                                var laneCard = Model.Lanes[lane - 1][index];
+                                var cardImagePath = CardImageHelper.GetCardImagePath(laneCard);
+                                <div class="card-container">
+                                    <p class="lane-card card"
+                                       data-lane="@lane"
+                                       data-card="@laneCard.Face @laneCard.Suit"
+                                       data-index="@index"
+                                       onclick="cardClicked('@laneCard.Face', '@laneCard.Suit', @index, event)">
+                                        <img src="@cardImagePath" alt="@laneCard.Face @laneCard.Suit" style="width:80px; height:auto;" />
+                                    </p>
+                                    <div class="attached-cards">
+                                        @foreach (var attachedCard in laneCard.AttachedCards)
+                                        {
+                                            var attachedImagePath = CardImageHelper.GetCardImagePath(attachedCard);
+                                            <p class="card">
+                                                <img src="@attachedImagePath"
+                                                     alt="@attachedCard.Face @attachedCard.Suit"
+                                                     style="width:60px; height:auto;" />
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>Empty</p>
+                        }
+                    </form>
+                </div>
+            }
+        </div>
+
+        <div style="display: flex; justify-content: space-around;">
+            @for (int lane = 4; lane <= 6; lane++)
+            {
+                <div>
+                    <form method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" name="selectedLane" value="@lane"
+                                style="background:none;border:none;padding:0;cursor:pointer;"
+                                @(HttpContext.Session.GetString("CurrentPlayer") == "Player 2" ? "" : "disabled")>
+                            <h4>Lane @lane (Score: @Model.CalculateLaneScore(@lane))</h4>
+                        </button>
+
+                        @if (Model.Lanes.Count >= lane && Model.Lanes[lane - 1] != null)
+                        {
+                            @for (int index = 0; index < Model.Lanes[lane - 1].Count; index++)
+                            {
+                                var laneCard = Model.Lanes[lane - 1][index];
+                                var cardImagePath = CardImageHelper.GetCardImagePath(laneCard);
+                                <div class="card-container">
+                                    <p class="lane-card card"
+                                       data-lane="@lane"
+                                       data-card="@laneCard.Face @laneCard.Suit"
+                                       data-index="@index"
+                                       onclick="cardClicked('@laneCard.Face', '@laneCard.Suit', @index, event)">
+                                        <img src="@cardImagePath" alt="@laneCard.Face @laneCard.Suit" style="width:80px; height:auto;" />
+                                    </p>
+                                    <div class="attached-cards">
+                                        @foreach (var attachedCard in laneCard.AttachedCards)
+                                        {
+                                            var attachedImagePath = CardImageHelper.GetCardImagePath(attachedCard);
+                                            <p class="card">
+                                                <img src="@attachedImagePath"
+                                                     alt="@attachedCard.Face @attachedCard.Suit"
+                                                     style="width:60px; height:auto;" />
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p>Empty</p>
+                        }
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
