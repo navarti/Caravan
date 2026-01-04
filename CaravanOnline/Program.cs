@@ -17,6 +17,9 @@ builder.Services.AddScoped<PhaseManager>();
 
 builder.Services.AddSingleton<OnlineGameStateService>();
 
+// Add background service for cleaning up abandoned games
+builder.Services.AddHostedService<GameCleanupService>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSession(options =>

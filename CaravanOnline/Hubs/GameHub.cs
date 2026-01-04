@@ -96,6 +96,9 @@ namespace CaravanOnline.Hubs
             // Add connection to the room group
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
 
+            // Update last activity on rejoin
+            room.UpdateLastActivity();
+
             // Send current game state to the caller immediately
             await BroadcastGameState(roomId);
         }
@@ -116,6 +119,7 @@ namespace CaravanOnline.Hubs
             room.CurrentPlayerConnectionId = room.Player1ConnectionId;
             room.CurrentLane = 1;
             room.Phase = 1;
+            room.UpdateLastActivity();
 
             await BroadcastGameState(roomId);
         }
@@ -175,6 +179,7 @@ namespace CaravanOnline.Hubs
             room.Lanes = _laneManager.Lanes;
             playerHand.Remove(card);
             _playerManager.AddRandomCardIfNecessary($"Player {playerNumber}", playerHand);
+            room.UpdateLastActivity();
 
             // Handle Phase 1 logic
             if (room.Phase == 1)
@@ -231,9 +236,12 @@ namespace CaravanOnline.Hubs
             var room = _gameStateService.GetRoom(roomId);
             if (room == null || Context.ConnectionId != room.CurrentPlayerConnectionId)
             {
+                System.Diagnostics.Debug.WriteLine($"[DiscardCard] Access denied - RoomId: {roomId}, ConnectionId: {Context.ConnectionId}");
                 await Clients.Caller.SendAsync("Error", "Not your turn or invalid room.");
                 return;
             }
+
+            System.Diagnostics.Debug.WriteLine($"[DiscardCard] Player discarding card - RoomId: {roomId}, Card: {face} {suit}");
 
             var playerNumber = room.GetPlayerNumber(Context.ConnectionId);
             var playerHand = playerNumber == 1 ? room.Player1Cards : room.Player2Cards;
@@ -241,14 +249,18 @@ namespace CaravanOnline.Hubs
             var card = playerHand.FirstOrDefault(c => c.Face == face && c.Suit == suit);
             if (card == null)
             {
+                System.Diagnostics.Debug.WriteLine($"[DiscardCard] Card not found in hand - Face: {face}, Suit: {suit}");
                 await Clients.Caller.SendAsync("Error", "Card not found in hand.");
                 return;
             }
 
             playerHand.Remove(card);
             _playerManager.AddRandomCardIfNecessary($"Player {playerNumber}", playerHand);
+            room.UpdateLastActivity();
 
             room.SwitchPlayer();
+
+            System.Diagnostics.Debug.WriteLine($"[DiscardCard] Card discarded successfully, broadcasting game state");
             await BroadcastGameState(roomId);
         }
 
@@ -257,15 +269,26 @@ namespace CaravanOnline.Hubs
             var room = _gameStateService.GetRoom(roomId);
             if (room == null || Context.ConnectionId != room.CurrentPlayerConnectionId)
             {
+                System.Diagnostics.Debug.WriteLine($"[DiscardLane] Access denied - RoomId: {roomId}, ConnectionId: {Context.ConnectionId}");
                 await Clients.Caller.SendAsync("Error", "Not your turn or invalid room.");
                 return;
             }
 
-            if (laneNumber < 1 || laneNumber > 6) return;
+            if (laneNumber < 1 || laneNumber > 6)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DiscardLane] Invalid lane number: {laneNumber}");
+                await Clients.Caller.SendAsync("Error", "Invalid lane number.");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[DiscardLane] Player discarding lane - RoomId: {roomId}, Lane: {laneNumber}");
 
             room.Lanes[laneNumber - 1].Clear();
+            room.UpdateLastActivity();
 
             room.SwitchPlayer();
+
+            System.Diagnostics.Debug.WriteLine($"[DiscardLane] Lane discarded successfully, broadcasting game state");
             await BroadcastGameState(roomId);
         }
 
@@ -358,12 +381,13 @@ namespace CaravanOnline.Hubs
             // Handle King - doubles the card value
             else if (attachedFace == "K")
             {
-                baseCard.AttachedCards.Add(cardToAttach);
-                playerHand.Remove(cardToAttach);
-                _playerManager.AddRandomCardIfNecessary($"Player {playerNumber}", playerHand);
-            }
+                    baseCard.AttachedCards.Add(cardToAttach);
+                    playerHand.Remove(cardToAttach);
+                    _playerManager.AddRandomCardIfNecessary($"Player {playerNumber}", playerHand);
+                }
 
-            room.SwitchPlayer();
+                room.UpdateLastActivity();
+                room.SwitchPlayer();
             await BroadcastGameState(roomId);
         }
 

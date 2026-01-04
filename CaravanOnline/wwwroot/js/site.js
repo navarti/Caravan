@@ -6,7 +6,10 @@ let discardLaneMode = false;
 let discardCardMode = false;
 
 function setUserMessage(msg) {
-    document.getElementById('userMessage').innerText = msg;
+    const userMessageElement = document.getElementById('userMessage');
+    if (userMessageElement) {
+        userMessageElement.innerText = msg;
+    }
 }
 
 function activateDiscardLane() {
@@ -28,7 +31,10 @@ function highlightCards(face, fullCard) {
     }
     selectedCardFace = face;
     selectedCardFull = fullCard;
-    document.getElementById('selectedCardInput').value = fullCard;
+    const selectedCardInput = document.getElementById('selectedCardInput');
+    if (selectedCardInput) {
+        selectedCardInput.value = fullCard;
+    }
 
     const laneCards = document.querySelectorAll('.lane-card');
     laneCards.forEach(laneCard => {

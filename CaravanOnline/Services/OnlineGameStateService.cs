@@ -1,4 +1,5 @@
 using CaravanOnline.Models;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace CaravanOnline.Services
                 {
                     room.Player2ConnectionId = player2ConnectionId;
                     room.Player2Name = player2Name;
+                    room.UpdateLastActivity();
                     return true;
                 }
             }
@@ -62,6 +64,24 @@ namespace CaravanOnline.Services
             var room = _gameRooms.Values.FirstOrDefault(r =>
                 r.Player1ConnectionId == connectionId || r.Player2ConnectionId == connectionId);
             return room?.RoomId;
+        }
+
+        public void RemoveRoom(string roomId)
+        {
+            _gameRooms.TryRemove(roomId, out _);
+        }
+
+        public List<GameRoom> GetAbandonedRooms(TimeSpan abandonedThreshold)
+        {
+            var cutoffTime = DateTime.UtcNow - abandonedThreshold;
+            return _gameRooms.Values
+                .Where(r => r.LastActivityAt < cutoffTime)
+                .ToList();
+        }
+
+        public int GetActiveRoomCount()
+        {
+            return _gameRooms.Count;
         }
     }
 }

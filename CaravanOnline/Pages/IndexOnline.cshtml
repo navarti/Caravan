@@ -14,8 +14,8 @@
     <p id="currentPlayerDisplay">Current Turn: <span id="currentPlayerName"></span></p>
 
     <div style="margin-bottom: 15px;">
-        <button type="button" id="discardLaneBtn" onclick="activateDiscardLane()">Discard Lane</button>
-        <button type="button" id="discardCardBtn" onclick="activateDiscardCard()">Discard Card</button>
+        <button type="button" id="discardLaneBtn" onclick="try { console.log('INLINE ONCLICK: Discard Lane'); activateDiscardLane(); } catch(e) { console.error('ERROR calling activateDiscardLane:', e); }">Discard Lane</button>
+        <button type="button" id="discardCardBtn" onclick="try { console.log('INLINE ONCLICK: Discard Card'); activateDiscardCard(); } catch(e) { console.error('ERROR calling activateDiscardCard:', e); }">Discard Card</button>
     </div>
 
     <div class="player-cards" id="playerCardsContainer">

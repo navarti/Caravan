@@ -31,6 +31,14 @@ namespace CaravanOnline.Services
                 LastFailReason = "Invalid lane number.";
                 return false;
             }
+
+            // Face cards (J, Q, K) cannot be placed in lanes - they can only be attached
+            if (card.Face == "J" || card.Face == "Q" || card.Face == "K")
+            {
+                LastFailReason = "Face cards (Jack, Queen, King) cannot be placed in lanes. They must be attached to existing cards.";
+                return false;
+            }
+
             var laneIndex = lane - 1;
             var currentLane = Lanes[laneIndex];
             if (currentLane.Count == 0)

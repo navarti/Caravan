@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CaravanOnline.Models
@@ -19,12 +20,18 @@ namespace CaravanOnline.Models
         public bool IsGameStarted { get; set; } = false;
         public Card? SelectedCardPhase2 { get; set; }
 
+        // Timestamp tracking for cleanup
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime LastActivityAt { get; set; } = DateTime.UtcNow;
+
         public GameRoom(string roomId, string player1ConnectionId, string player1Name)
         {
             RoomId = roomId;
             Player1ConnectionId = player1ConnectionId;
             Player1Name = player1Name;
             CurrentPlayerConnectionId = player1ConnectionId;
+            CreatedAt = DateTime.UtcNow;
+            LastActivityAt = DateTime.UtcNow;
         }
 
         public bool IsFull() => !string.IsNullOrEmpty(Player2ConnectionId);
@@ -48,11 +55,17 @@ namespace CaravanOnline.Models
             return GetPlayerName(CurrentPlayerConnectionId) ?? "Unknown";
         }
 
+        public void UpdateLastActivity()
+        {
+            LastActivityAt = DateTime.UtcNow;
+        }
+
         public void SwitchPlayer()
         {
             CurrentPlayerConnectionId = CurrentPlayerConnectionId == Player1ConnectionId 
                 ? Player2ConnectionId ?? Player1ConnectionId 
                 : Player1ConnectionId;
+            UpdateLastActivity();
         }
     }
 }
