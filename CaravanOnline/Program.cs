@@ -3,9 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CaravanOnline.Services;
 using CaravanOnline.Hubs;
+using CaravanOnline.Models;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<FeedbackSettings>(builder.Configuration.GetSection("FeedbackSettings"));
 
 builder.Services.AddRazorPages();
 

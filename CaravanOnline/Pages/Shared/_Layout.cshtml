@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.Extensions.Options
+@inject IOptions<CaravanOnline.Models.FeedbackSettings> FeedbackSettings
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,8 +9,15 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/CaravanOnline.styles.css" asp-append-version="true" />
+
 </head>
 <body>
+    @if (!string.IsNullOrEmpty(FeedbackSettings.Value.FeedbackLink))
+    {
+        <div class="alert alert-info text-center mb-0" role="alert" style="border-radius: 0; font-size: 0.9rem;">
+            If you want to say thank you/suggest improvements/report bugs: feel free to write here: <a href="@FeedbackSettings.Value.FeedbackLink" target="_blank" class="alert-link">@FeedbackSettings.Value.FeedbackLink</a>
+        </div>
+    }
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
